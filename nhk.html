@@ -29,6 +29,8 @@
           receiverApplicationId: chrome.cast.media.DEFAULT_MEDIA_RECEIVER_APP_ID,
           autoJoinPolicy: chrome.cast.AutoJoinPolicy.ORIGIN_SCOPED
         });
+      document.getElementById('wrapper').style.display='block';
+      document.getElementById('cast-button').style.display='block';      
       }
     };
 
@@ -41,8 +43,7 @@
     }
 
     document.getElementById('cast-button').addEventListener('click', castVideo);
-    document.getElementById('wrapper').style.display='block';
-    document.getElementById('cast-button').style.display='block';
+    
   </script>
 </body>
 </html>
