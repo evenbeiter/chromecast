@@ -1,18 +1,25 @@
 <!DOCTYPE html>
 <html>
 <head>
-  <script type="text/javascript" src="https://www.gstatic.com/cv/js/sender/v1/cast_sender.js?loadCastFramework=1"></script>
-  <style>
-    #cast-button {
-      width: 50px;
-      height: 50px;
-    }
-  </style>
+<link rel="manifest" href="manifest.json">
+<link rel="icon" type="image/png" href="https://evenbeiter.github.io/newsbeiter/icons/icon-32.png">
+<link rel="apple-touch-icon" href="https://evenbeiter.github.io/newsbeiter/icons/icon.png">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-title" content="">
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet" integrity="sha384-QWTKZyjpPEjISv5WaRU9OFeRpok6YctnYmDr5pNlyT2bRjXh0JMhjY6hW+ALEwIH" crossorigin="anonymous">
+<script type="text/javascript" src="https://www.gstatic.com/cv/js/sender/v1/cast_sender.js?loadCastFramework=1"></script>
+<style>
+</style>
 </head>
 <body>
-  <cast-media-player id="media-player"></cast-media-player>
-  <google-cast-launcher id="cast-button"></google-cast-launcher>
+<cast-media-player id="media-player"></cast-media-player>
+<div id="loading" class="position-fixed w-100 top-0 start-0" style="height:100vh;display:none">
+  <google-cast-launcher id="cast-button" class="position-absolute top-50 start-50 translate-middle" style="z-index:1030;width:5rem;height:5rem"></google-cast-launcher>
+</div>
 
+  
   <script>
     window['__onGCastApiAvailable'] = function(isAvailable) {
       if (isAvailable) {
@@ -24,7 +31,6 @@
       }
     };
 
-    // 當按下 cast 按鈕後播放影片
     async function castVideo() {
       const context = cast.framework.CastContext.getInstance();
       const session = await context.requestSession();
