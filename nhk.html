@@ -1,1 +1,39 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <script type="text/javascript" src="https://www.gstatic.com/cv/js/sender/v1/cast_sender.js?loadCastFramework=1"></script>
+  <style>
+    #cast-button {
+      width: 50px;
+      height: 50px;
+    }
+  </style>
+</head>
+<body>
+  <cast-media-player id="media-player"></cast-media-player>
+  <google-cast-launcher id="cast-button"></google-cast-launcher>
 
+  <script>
+    window['__onGCastApiAvailable'] = function(isAvailable) {
+      if (isAvailable) {
+        const context = cast.framework.CastContext.getInstance();
+        context.setOptions({
+          receiverApplicationId: chrome.cast.media.DEFAULT_MEDIA_RECEIVER_APP_ID,
+          autoJoinPolicy: chrome.cast.AutoJoinPolicy.ORIGIN_SCOPED
+        });
+      }
+    };
+
+    // 當按下 cast 按鈕後播放影片
+    async function castVideo() {
+      const context = cast.framework.CastContext.getInstance();
+      const session = await context.requestSession();
+      const mediaInfo = new chrome.cast.media.MediaInfo("你的影片URL", "video/mp4");
+      const request = new chrome.cast.media.LoadRequest(mediaInfo);
+      session.loadMedia(request);
+    }
+
+    document.getElementById('cast-button').addEventListener('click', castVideo);
+  </script>
+</body>
+</html>
