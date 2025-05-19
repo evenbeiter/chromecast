@@ -1,49 +1,65 @@
-<!DOCTYPE html>
-<html>
+你<!DOCTYPE html>
+<html lang="zh-TW">
 <head>
-  <meta charset="utf-8" />
-  <title>Cast Test</title>
-  <!-- 載入 Cast Sender SDK -->
-  <script type="text/javascript" src="https://www.gstatic.com/cv/js/sender/v1/cast_sender.js?loadCastFramework=1"></script>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Chromecast 投放示例</title>
+    <script src="https://www.gstatic.com/cast/sdk/libs/caf_receiver/v3/cast_receiver_framework.js"></script>
+    <script src="https://www.gstatic.com/cast/sdk/libs/caf_sender/v3/cast_sender.js"></script>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            text-align: center;
+            margin-top: 50px;
+        }
+        button {
+            font-size: 16px;
+            padding: 10px 20px;
+            cursor: pointer;
+        }
+    </style>
 </head>
 <body>
-  <!-- Chromecast 按鈕 -->
-  <google-cast-launcher id="cast-button"></google-cast-launcher>
-  <button onclick="cast.framework.CastContext.getInstance().requestSession()">Cast</button>
+    <h1>點擊按鈕投放影片</h1>
+    <button id="castButton">投放影片</button>
 
-  <script>
-    window['__onGCastApiAvailable'] = function(isAvailable) {
-      if (isAvailable) {
-        alert("Cast API is available");
+    <script>
+        let castSession;
 
-        const context = cast.framework.CastContext.getInstance();
-        context.setOptions({
-          receiverApplicationId: chrome.cast.media.DEFAULT_MEDIA_RECEIVER_APP_ID,
-          autoJoinPolicy: chrome.cast.AutoJoinPolicy.ORIGIN_SCOPED
-        });
+        function initializeCastApi() {
+            cast.framework.CastContext.getInstance().setOptions({
+                receiverApplicationId: chrome.cast.media.DEFAULT_MEDIA_RECEIVER_APP_ID,
+                autoJoinPolicy: chrome.cast.AutoJoinPolicy.ORIGIN_SCOPED
+            });
 
-        // 檢查 state
-        context.addEventListener(
-          cast.framework.CastContextEventType.CAST_STATE_CHANGED,
-          function(event) {
-            alert('[Cast State]', event.castState);
-          }
-        );
-      } else {
-        alert("Cast API not available");
-      }
-    };
-  </script>
+            document.getElementById("castButton").addEventListener("click", function() {
+                castSession = cast.framework.CastContext.getInstance().getCurrentSession();
+                if (!castSession) {
+                    cast.framework.CastContext.getInstance().requestSession().then(() => {
+                        sendMedia();
+                    });
+                } else {
+                    sendMedia();
+                }
+            });
+        }
 
-  <style>
-    /* 強制讓按鈕看得見（測試用途） */
-    google-cast-launcher#cast-button {
-      display: inline-block !important;
-      width: 48px;
-      height: 48px;
-      --cast-button-color: white;
-      background-color: black;
-    }
-  </style>
+        function sendMedia() {
+            const mediaInfo = new chrome.cast.media.MediaInfo("https://www3.nhk.or.jp/nhkworld/common/player/tv/premiumlive/embed/embed.html", "video/mp4");
+            const request = new chrome.cast.media.LoadRequest(mediaInfo);
+            castSession.loadMedia(request).then(() => {
+                console.log("影片已成功投放到 Chromecast");
+            }, (error) => {
+                console.error("投放失敗：", error);
+            });
+        }
+
+        window["__onGCastApiAvailable"] = function(isAvailable) {
+            if (isAvailable) {
+                initializeCastApi();
+            }
+        };
+    </script>
+    <script src="https://www.gstatic.com/cast/sdk/libs/caf_sender/v3/cast_sender.js"></script>
 </body>
 </html>
