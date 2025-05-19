@@ -1,0 +1,69 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="UTF-8" />
+  <title>Cast Demo</title>
+
+  <!-- 載入 Cast Sender SDK -->
+  <script type="text/javascript" src="https://www.gstatic.com/cv/js/sender/v1/cast_sender.js?loadCastFramework=1"></script>
+
+  <style>
+    body {
+      background-color: #000;
+      color: white;
+      font-family: sans-serif;
+      padding: 2em;
+    }
+    #cast-button {
+      width: 48px;
+      height: 48px;
+    }
+    google-cast-launcher {
+      --connected-color: white;
+      --disconnected-color: white;
+      --connecting-color: white;
+      display: inline-block;
+    }
+  </style>
+
+  <script>
+    window['__onGCastApiAvailable'] = function(isAvailable) {
+      if (isAvailable) {
+        cast.framework.CastContext.getInstance().setOptions({
+          receiverApplicationId: chrome.cast.media.DEFAULT_MEDIA_RECEIVER_APP_ID,
+          autoJoinPolicy: chrome.cast.AutoJoinPolicy.ORIGIN_SCOPED
+        });
+      }
+    };
+
+    function launchMedia() {
+      const context = cast.framework.CastContext.getInstance();
+      const session = context.getCurrentSession();
+      if (!session) {
+        alert("請先點擊右上角的 Chromecast 按鈕連線");
+        return;
+      }
+
+      const mediaInfo = new chrome.cast.media.MediaInfo('https://storage.googleapis.com/media-session/caminandes/short.mp4', 'video/mp4');
+      const request = new chrome.cast.media.LoadRequest(mediaInfo);
+      session.loadMedia(request).then(() => {
+        console.log('Media loaded successfully');
+      }, (errorCode) => {
+        console.error('Error loading media', errorCode);
+      });
+    }
+  </script>
+</head>
+<body>
+  <h1>Cast Demo</h1>
+  <p>請點右上角的 Chromecast 圖示連線，再點下面的按鈕播放影片。</p>
+
+  <!-- Cast 按鈕 -->
+  <google-cast-launcher id="cast-button"></google-cast-launcher>
+
+  <!-- 播放影片按鈕 -->
+  <div style="margin-top: 2em;">
+    <button onclick="launchMedia()">播放影片</button>
+  </div>
+</body>
+</html>
