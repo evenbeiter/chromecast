@@ -28,7 +28,7 @@
     async function castVideo() {
       const context = cast.framework.CastContext.getInstance();
       const session = await context.requestSession();
-      const mediaInfo = new chrome.cast.media.MediaInfo("你的影片URL", "video/mp4");
+      const mediaInfo = new chrome.cast.media.MediaInfo("https://www3.nhk.or.jp/nhkworld/common/player/tv/premiumlive/embed/embed.html", "video/mp4");
       const request = new chrome.cast.media.LoadRequest(mediaInfo);
       session.loadMedia(request);
     }
