@@ -1,81 +1,48 @@
 <!DOCTYPE html>
 <html>
 <head>
-  <meta charset="UTF-8" />
-  <title>Cast Demo</title>
-
-  <!-- 載入 Cast Sender SDK（一定要先載入） -->
-  <script src="https://www.gstatic.com/cv/js/sender/v1/cast_sender.js?loadCastFramework=1"></script>
-
-  <style>
-    body {
-      font-family: sans-serif;
-      padding: 2em;
-    }
-    google-cast-launcher {
-      width: 48px;
-      height: 48px;
-      display: inline-block;
-    }
-    button {
-      font-size: 1rem;
-      padding: 0.6em 1.2em;
-    }
-  </style>
+  <meta charset="utf-8" />
+  <title>Cast Test</title>
+  <!-- 載入 Cast Sender SDK -->
+  <script type="text/javascript" src="https://www.gstatic.com/cv/js/sender/v1/cast_sender.js?loadCastFramework=1"></script>
+</head>
+<body>
+  <!-- Chromecast 按鈕 -->
+  <google-cast-launcher id="cast-button"></google-cast-launcher>
 
   <script>
-    // 初始化 CastContext（避免 cast is not defined 錯誤）
-    function waitForCastFrameworkInit() {
-      if (window.cast && cast.framework) {
+    window['__onGCastApiAvailable'] = function(isAvailable) {
+      if (isAvailable) {
+        console.log("Cast API is available");
+
         const context = cast.framework.CastContext.getInstance();
         context.setOptions({
           receiverApplicationId: chrome.cast.media.DEFAULT_MEDIA_RECEIVER_APP_ID,
           autoJoinPolicy: chrome.cast.AutoJoinPolicy.ORIGIN_SCOPED
         });
-      } else {
-        // 若尚未準備好，稍後再嘗試
-        setTimeout(waitForCastFrameworkInit, 300);
-      }
-    }
 
-    window.__onGCastApiAvailable = function(isAvailable) {
-      if (isAvailable) {
-        waitForCastFrameworkInit();
+        // 檢查 state
+        context.addEventListener(
+          cast.framework.CastContextEventType.CAST_STATE_CHANGED,
+          function(event) {
+            console.log('[Cast State]', event.castState);
+          }
+        );
+      } else {
+        console.log("Cast API not available");
       }
     };
-
-    function launchMedia() {
-      const context = cast.framework.CastContext.getInstance();
-      const session = context.getCurrentSession();
-      if (!session) {
-        alert("請先點右上角的 Cast 按鈕連接裝置");
-        return;
-      }
-
-      const mediaInfo = new chrome.cast.media.MediaInfo(
-        'https://storage.googleapis.com/media-session/caminandes/short.mp4',
-        'video/mp4'
-      );
-      const request = new chrome.cast.media.LoadRequest(mediaInfo);
-
-      session.loadMedia(request).then(() => {
-        console.log('成功播放影片');
-      }).catch((error) => {
-        console.error('播放失敗', error);
-      });
-    }
   </script>
-</head>
-<body>
-  <h1>Cast Demo</h1>
-  <p>請點右上角的 Cast 按鈕連線後，再點下方按鈕播放影片。</p>
 
-  <!-- Cast 按鈕 -->
-  <google-cast-launcher id="cast-button"></google-cast-launcher>
-
-  <br /><br />
-
-  <!-- 播放影片按鈕 -->
-  <button onclick="launchMedia()">播放影片</button>
+  <style>
+    /* 強制讓按鈕看得見（測試用途） */
+    google-cast-launcher#cast-button {
+      display: inline-block !important;
+      width: 48px;
+      height: 48px;
+      --cast-button-color: white;
+      background-color: black;
+    }
+  </style>
 </body>
 </html>
