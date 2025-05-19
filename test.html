@@ -4,8 +4,8 @@
   <meta charset="UTF-8" />
   <title>Cast Demo</title>
 
-  <!-- 載入 Cast Sender SDK -->
-  <script type="text/javascript" src="https://www.gstatic.com/cv/js/sender/v1/cast_sender.js?loadCastFramework=1"></script>
+  <!-- 載入 Cast Sender SDK（一定要先載入） -->
+  <script src="https://www.gstatic.com/cv/js/sender/v1/cast_sender.js?loadCastFramework=1"></script>
 
   <style>
     body {
@@ -14,25 +14,38 @@
       font-family: sans-serif;
       padding: 2em;
     }
-    #cast-button {
+    google-cast-launcher {
       width: 48px;
       height: 48px;
-    }
-    google-cast-launcher {
       --connected-color: white;
       --disconnected-color: white;
       --connecting-color: white;
       display: inline-block;
     }
+    button {
+      font-size: 1rem;
+      padding: 0.6em 1.2em;
+    }
   </style>
 
   <script>
-    window['__onGCastApiAvailable'] = function(isAvailable) {
-      if (isAvailable) {
-        cast.framework.CastContext.getInstance().setOptions({
+    // 初始化 CastContext（避免 cast is not defined 錯誤）
+    function waitForCastFrameworkInit() {
+      if (window.cast && cast.framework) {
+        const context = cast.framework.CastContext.getInstance();
+        context.setOptions({
           receiverApplicationId: chrome.cast.media.DEFAULT_MEDIA_RECEIVER_APP_ID,
           autoJoinPolicy: chrome.cast.AutoJoinPolicy.ORIGIN_SCOPED
         });
+      } else {
+        // 若尚未準備好，稍後再嘗試
+        setTimeout(waitForCastFrameworkInit, 300);
+      }
+    }
+
+    window.__onGCastApiAvailable = function(isAvailable) {
+      if (isAvailable) {
+        waitForCastFrameworkInit();
       }
     };
 
@@ -40,30 +53,34 @@
       const context = cast.framework.CastContext.getInstance();
       const session = context.getCurrentSession();
       if (!session) {
-        alert("請先點擊右上角的 Chromecast 按鈕連線");
+        alert("請先點右上角的 Cast 按鈕連接裝置");
         return;
       }
 
-      const mediaInfo = new chrome.cast.media.MediaInfo('https://www3.nhk.or.jp/nhkworld/common/player/tv/premiumlive/embed/embed.html', 'video/mp4');
+      const mediaInfo = new chrome.cast.media.MediaInfo(
+        'https://storage.googleapis.com/media-session/caminandes/short.mp4',
+        'video/mp4'
+      );
       const request = new chrome.cast.media.LoadRequest(mediaInfo);
+
       session.loadMedia(request).then(() => {
-        console.log('Media loaded successfully');
-      }, (errorCode) => {
-        console.error('Error loading media', errorCode);
+        console.log('成功播放影片');
+      }).catch((error) => {
+        console.error('播放失敗', error);
       });
     }
   </script>
 </head>
 <body>
   <h1>Cast Demo</h1>
-  <p>請點右上角的 Chromecast 圖示連線，再點下面的按鈕播放影片。</p>
+  <p>請點右上角的 Cast 按鈕連線後，再點下方按鈕播放影片。</p>
 
   <!-- Cast 按鈕 -->
   <google-cast-launcher id="cast-button"></google-cast-launcher>
 
+  <br /><br />
+
   <!-- 播放影片按鈕 -->
-  <div style="margin-top: 2em;">
-    <button onclick="launchMedia()">播放影片</button>
-  </div>
+  <button onclick="launchMedia()">播放影片</button>
 </body>
 </html>
