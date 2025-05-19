@@ -44,7 +44,7 @@
         return;
       }
 
-      const mediaInfo = new chrome.cast.media.MediaInfo('https://storage.googleapis.com/media-session/caminandes/short.mp4', 'video/mp4');
+      const mediaInfo = new chrome.cast.media.MediaInfo('https://www3.nhk.or.jp/nhkworld/common/player/tv/premiumlive/embed/embed.html', 'video/mp4');
       const request = new chrome.cast.media.LoadRequest(mediaInfo);
       session.loadMedia(request).then(() => {
         console.log('Media loaded successfully');
