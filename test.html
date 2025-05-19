@@ -9,6 +9,7 @@
 <body>
   <!-- Chromecast 按鈕 -->
   <google-cast-launcher id="cast-button"></google-cast-launcher>
+  <button onclick="cast.framework.CastContext.getInstance().requestSession()">Cast</button>
 
   <script>
     window['__onGCastApiAvailable'] = function(isAvailable) {
@@ -25,11 +26,11 @@
         context.addEventListener(
           cast.framework.CastContextEventType.CAST_STATE_CHANGED,
           function(event) {
-            console.log('[Cast State]', event.castState);
+            alert('[Cast State]', event.castState);
           }
         );
       } else {
-        console.log("Cast API not available");
+        alert("Cast API not available");
       }
     };
   </script>
