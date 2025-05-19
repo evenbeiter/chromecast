@@ -2,8 +2,8 @@
 <html>
 <head>
 <link rel="manifest" href="manifest.json">
-<link rel="icon" type="image/png" href="https://evenbeiter.github.io/newsbeiter/icons/icon-32.png">
-<link rel="apple-touch-icon" href="https://evenbeiter.github.io/newsbeiter/icons/icon.png">
+<link rel="icon" type="image/png" href="https://evenbeiter.github.io/chromecast/icon-32.png">
+<link rel="apple-touch-icon" href="https://evenbeiter.github.io/chromecast/icon.png">
 <meta name="mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-title" content="">
 <meta charset="utf-8">
@@ -15,8 +15,8 @@
 </head>
 <body>
 <cast-media-player id="media-player"></cast-media-player>
-<div id="loading" class="position-fixed w-100 top-0 start-0" style="height:100vh;display:none">
-  <google-cast-launcher id="cast-button" class="position-absolute top-50 start-50 translate-middle" style="z-index:1030;width:5rem;height:5rem"></google-cast-launcher>
+<div id="wrapper" class="position-fixed w-100 top-0 start-0" style="height:100vh;display:none">
+  <google-cast-launcher id="cast-button" class="position-absolute top-50 start-50 translate-middle" style="z-index:1030;width:10rem;height:10rem"></google-cast-launcher>
 </div>
 
   
@@ -40,6 +40,8 @@
     }
 
     document.getElementById('cast-button').addEventListener('click', castVideo);
+    document.getElementById('wrapper').style.display='block';
+    document.getElementById('cast-button').style.display='block';
   </script>
 </body>
 </html>
