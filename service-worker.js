@@ -3,7 +3,7 @@ self.addEventListener('install', event => {
     caches.open('cast-cache').then(cache => {
       return cache.addAll([
         '/',
-        '/index.html',
+        '/nhk.html',
         '/manifest.json',
         '/icon-192.png',
         '/icon-512.png',
