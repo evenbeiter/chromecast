@@ -1,45 +1,87 @@
 <!DOCTYPE html>
-<html lang="zh">
+<html lang="zh-TW">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Chromecast 投放</title>
-    <script src="https://www.gstatic.com/cv/js/sender/v1/cast_sender.js?loadCastFramework=1"></script>
+    <title>Chromecast 影片投放</title>
+    <script type="text/javascript" src="https://www.gstatic.com/cv/js/sender/v1/cast_sender.js?loadCastFramework=1"></script>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            text-align: center;
+            padding: 20px;
+        }
+        button {
+            padding: 10px 20px;
+            font-size: 16px;
+            margin: 10px;
+        }
+    </style>
+</head>
+<body>
+    <h1>投放影片到 Chromecast</h1>
+    <button id="castButton" disabled>投放影片</button>
+    <p id="status">初始化中...</p>
+
     <script>
-        window.__onGCastApiAvailable = function(isAvailable) {
+        // 使用預設媒體接收器 ID
+        const applicationId = chrome.cast.media.DEFAULT_MEDIA_RECEIVER_APP_ID;
+        // 替換為你的影片 embed URL（例如 YouTube 或公開的 MP4）
+        const videoUrl = 'https://www3.nhk.or.jp/nhkworld/common/player/tv/premiumlive/embed/embed.html'; // 替換為你的影片 URL
+
+        // 初始化 Cast SDK
+        window['__onGCastApiAvailable'] = function(isAvailable) {
             if (isAvailable) {
                 initializeCastApi();
+            } else {
+                document.getElementById('status').innerText = '無法載入 Chromecast API';
             }
         };
 
         function initializeCastApi() {
-            const context = cast.framework.CastContext.getInstance();
-            context.setOptions({
-                receiverApplicationId: chrome.cast.media.DEFAULT_MEDIA_RECEIVER_APP_ID
+            cast.framework.CastContext.getInstance().setOptions({
+                receiverApplicationId: applicationId,
+                autoJoinPolicy: chrome.cast.AutoJoinPolicy.ORIGIN_SCOPED
             });
+
+            // 監聽 Chromecast 狀態
+            cast.framework.CastContext.getInstance().addEventListener(
+                cast.framework.CastContextEventType.CAST_STATE_CHANGED,
+                function(event) {
+                    const castButton = document.getElementById('castButton');
+                    const status = document.getElementById('status');
+                    if (event.castState === cast.framework.CastState.CONNECTED) {
+                        status.innerText = '已連接到 Chromecast';
+                        castButton.disabled = false;
+                    } else if (event.castState === cast.framework.CastState.NOT_CONNECTED) {
+                        status.innerText = '未連接到 Chromecast';
+                        castButton.disabled = true;
+                    } else if (event.castState === cast.framework.CastState.CONNECTING) {
+                        status.innerText = '正在連接到 Chromecast...';
+                        castButton.disabled = true;
+                    }
+                }
+            );
         }
 
-        function castVideo() {
-            const context = cast.framework.CastContext.getInstance();
-            const session = context.getCurrentSession();
-            if (session) {
-                const mediaInfo = new chrome.cast.media.MediaInfo("https://www3.nhk.or.jp/nhkworld/common/player/tv/premiumlive/embed/embed.html", "video/mp4");
+        // 按鈕點擊事件：投放影片
+        document.getElementById('castButton').addEventListener('click', function() {
+            const castSession = cast.framework.CastContext.getInstance().getCurrentSession();
+            if (castSession) {
+                const mediaInfo = new chrome.cast.media.MediaInfo(videoUrl, 'video/mp4');
                 const request = new chrome.cast.media.LoadRequest(mediaInfo);
-                session.loadMedia(request).then(
-                    () => console.log("投放成功"),
-                    (error) => console.error("投放失敗", error)
+                castSession.loadMedia(request).then(
+                    function() {
+                        document.getElementById('status').innerText = '影片投放成功！';
+                    },
+                    function(errorCode) {
+                        document.getElementById('status').innerText = '投放失敗: ' + errorCode;
+                    }
                 );
             } else {
-                console.error("未找到 Chromecast 裝置");
+                document.getElementById('status').innerText = '請先連接到 Chromecast';
             }
-        }
+        });
     </script>
-</head>
-<body>
-    <h1>Chromecast 投放範例</h1>
-    <button id="castButton" onclick="castVideo()">
-        <img src="https://upload.wikimedia.org/wikipedia/commons/thumb/8/8f/Google_Cast_logo.svg/120px-Google_Cast_logo.svg.png" 
-             alt="投放" width="40">
-    </button>
 </body>
 </html>
