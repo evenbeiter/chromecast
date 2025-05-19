@@ -30,6 +30,7 @@
           autoJoinPolicy: chrome.cast.AutoJoinPolicy.ORIGIN_SCOPED
         }); 
         alert('available');
+        alert(cast.framework.CastContext.getInstance().getCastState());
       }
     };
 
