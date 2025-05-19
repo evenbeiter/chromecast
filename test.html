@@ -1,65 +1,45 @@
-你<!DOCTYPE html>
-<html lang="zh-TW">
+<!DOCTYPE html>
+<html lang="zh">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Chromecast 投放示例</title>
-    <script src="https://www.gstatic.com/cast/sdk/libs/caf_receiver/v3/cast_receiver_framework.js"></script>
-    <script src="https://www.gstatic.com/cast/sdk/libs/caf_sender/v3/cast_sender.js"></script>
-    <style>
-        body {
-            font-family: Arial, sans-serif;
-            text-align: center;
-            margin-top: 50px;
-        }
-        button {
-            font-size: 16px;
-            padding: 10px 20px;
-            cursor: pointer;
-        }
-    </style>
-</head>
-<body>
-    <h1>點擊按鈕投放影片</h1>
-    <button id="castButton">投放影片</button>
-
+    <title>Chromecast 投放</title>
+    <script src="https://www.gstatic.com/cv/js/sender/v1/cast_sender.js?loadCastFramework=1"></script>
     <script>
-        let castSession;
-
-        function initializeCastApi() {
-            cast.framework.CastContext.getInstance().setOptions({
-                receiverApplicationId: chrome.cast.media.DEFAULT_MEDIA_RECEIVER_APP_ID,
-                autoJoinPolicy: chrome.cast.AutoJoinPolicy.ORIGIN_SCOPED
-            });
-
-            document.getElementById("castButton").addEventListener("click", function() {
-                castSession = cast.framework.CastContext.getInstance().getCurrentSession();
-                if (!castSession) {
-                    cast.framework.CastContext.getInstance().requestSession().then(() => {
-                        sendMedia();
-                    });
-                } else {
-                    sendMedia();
-                }
-            });
-        }
-
-        function sendMedia() {
-            const mediaInfo = new chrome.cast.media.MediaInfo("https://www3.nhk.or.jp/nhkworld/common/player/tv/premiumlive/embed/embed.html", "video/mp4");
-            const request = new chrome.cast.media.LoadRequest(mediaInfo);
-            castSession.loadMedia(request).then(() => {
-                console.log("影片已成功投放到 Chromecast");
-            }, (error) => {
-                console.error("投放失敗：", error);
-            });
-        }
-
-        window["__onGCastApiAvailable"] = function(isAvailable) {
+        window.__onGCastApiAvailable = function(isAvailable) {
             if (isAvailable) {
                 initializeCastApi();
             }
         };
+
+        function initializeCastApi() {
+            const context = cast.framework.CastContext.getInstance();
+            context.setOptions({
+                receiverApplicationId: chrome.cast.media.DEFAULT_MEDIA_RECEIVER_APP_ID
+            });
+        }
+
+        function castVideo() {
+            const context = cast.framework.CastContext.getInstance();
+            const session = context.getCurrentSession();
+            if (session) {
+                const mediaInfo = new chrome.cast.media.MediaInfo("https://www3.nhk.or.jp/nhkworld/common/player/tv/premiumlive/embed/embed.html", "video/mp4");
+                const request = new chrome.cast.media.LoadRequest(mediaInfo);
+                session.loadMedia(request).then(
+                    () => console.log("投放成功"),
+                    (error) => console.error("投放失敗", error)
+                );
+            } else {
+                console.error("未找到 Chromecast 裝置");
+            }
+        }
     </script>
-    <script src="https://www.gstatic.com/cast/sdk/libs/caf_sender/v3/cast_sender.js"></script>
+</head>
+<body>
+    <h1>Chromecast 投放範例</h1>
+    <button id="castButton" onclick="castVideo()">
+        <img src="https://upload.wikimedia.org/wikipedia/commons/thumb/8/8f/Google_Cast_logo.svg/120px-Google_Cast_logo.svg.png" 
+             alt="投放" width="40">
+    </button>
 </body>
 </html>
