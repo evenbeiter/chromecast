@@ -16,14 +16,10 @@
   <google-cast-launcher id="cast-button" class="position-absolute top-50 start-50 translate-middle" style="z-index:1030;width:10rem;height:10rem"></google-cast-launcher>
 </div> -->
 
-  
-  <h1>投放影片到 Chromecast</h1>
-  <button onclick="launchCast()">投放影片</button>
+  <google-cast-launcher id="cast-button"></google-cast-launcher>
 
   <script>
-    const VIDEO_URL = 'https://nhkw-pre-hlscomp.nhkworld.jp/tki0ytgfeznlb4rk/playlist.m3u8'; // 你的 m3u8 連結
-
-    let castSession = null;
+    const VIDEO_URL = 'https://nhkw-pre-hlscomp.nhkworld.jp/tki0ytgfeznlb4rk/playlist.m3u8'; // 替換成你的 m3u8 URL
 
     window['__onGCastApiAvailable'] = function(isAvailable) {
       if (isAvailable) {
@@ -31,21 +27,24 @@
           receiverApplicationId: chrome.cast.media.DEFAULT_MEDIA_RECEIVER_APP_ID,
           autoJoinPolicy: chrome.cast.AutoJoinPolicy.ORIGIN_SCOPED
         });
+
+        cast.framework.CastContext.getInstance().addEventListener(
+          cast.framework.CastContextEventType.SESSION_STATE_CHANGED,
+          function(event) {
+            if (event.sessionState === cast.framework.SessionState.SESSION_STARTED ||
+                event.sessionState === cast.framework.SessionState.SESSION_RESUMED) {
+              const session = cast.framework.CastContext.getInstance().getCurrentSession();
+              const mediaInfo = new chrome.cast.media.MediaInfo(VIDEO_URL, 'application/x-mpegURL');
+              const request = new chrome.cast.media.LoadRequest(mediaInfo);
+              session.loadMedia(request).then(
+                () => console.log('影片已開始播放'),
+                error => console.error('播放錯誤:', error)
+              );
+            }
+          }
+        );
       }
     };
-
-    function launchCast() {
-      const context = cast.framework.CastContext.getInstance();
-      context.requestSession().then(() => {
-        castSession = context.getCurrentSession();
-        const mediaInfo = new chrome.cast.media.MediaInfo(VIDEO_URL, 'application/x-mpegURL');
-        const request = new chrome.cast.media.LoadRequest(mediaInfo);
-        castSession.loadMedia(request).then(
-          () => console.log('影片已開始播放'),
-          (errorCode) => console.log('錯誤：', errorCode)
-        );
-      });
-    }
   </script>
 </body>
 </html>
