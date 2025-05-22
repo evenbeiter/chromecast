@@ -11,33 +11,41 @@
 </style>
 </head>
 <body>
-<cast-media-player id="media-player"></cast-media-player>
+<!-- <cast-media-player id="media-player"></cast-media-player>
 <div id="wrapper" class="position-fixed w-100 top-0 start-0" style="height:100vh;display:none">
   <google-cast-launcher id="cast-button" class="position-absolute top-50 start-50 translate-middle" style="z-index:1030;width:10rem;height:10rem"></google-cast-launcher>
-</div>
+</div> -->
 
   
+  <h1>投放影片到 Chromecast</h1>
+  <button onclick="launchCast()">投放影片</button>
+
   <script>
+    const VIDEO_URL = 'https://nhkw-pre-hlscomp.nhkworld.jp/tki0ytgfeznlb4rk/playlist.m3u8'; // 你的 m3u8 連結
+
+    let castSession = null;
+
     window['__onGCastApiAvailable'] = function(isAvailable) {
       if (isAvailable) {
-        const context = cast.framework.CastContext.getInstance();
-        context.setOptions({
+        cast.framework.CastContext.getInstance().setOptions({
           receiverApplicationId: chrome.cast.media.DEFAULT_MEDIA_RECEIVER_APP_ID,
           autoJoinPolicy: chrome.cast.AutoJoinPolicy.ORIGIN_SCOPED
-        }); 
-        alert('available');
+        });
       }
     };
 
-    async function castVideo() {
+    function launchCast() {
       const context = cast.framework.CastContext.getInstance();
-      const session = await context.requestSession();
-      const mediaInfo = new chrome.cast.media.MediaInfo("https://nhkw-pre-hlscomp.nhkworld.jp/tki0ytgfeznlb4rk/playlist.m3u8", "video/mp4");
-      const request = new chrome.cast.media.LoadRequest(mediaInfo);
-      session.loadMedia(request);
+      context.requestSession().then(() => {
+        castSession = context.getCurrentSession();
+        const mediaInfo = new chrome.cast.media.MediaInfo(VIDEO_URL, 'application/x-mpegURL');
+        const request = new chrome.cast.media.LoadRequest(mediaInfo);
+        castSession.loadMedia(request).then(
+          () => console.log('影片已開始播放'),
+          (errorCode) => console.log('錯誤：', errorCode)
+        );
+      });
     }
-
-    document.getElementById('cast-button').addEventListener('click', castVideo);
   </script>
 </body>
 </html>
